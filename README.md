@@ -7,9 +7,14 @@ A *spike* for utilizing Postgresql's Json type support for an event store backen
 
 ## Concept
 
+* Use Postgresql as an event store
+* Expose a declarative DSL to model how to update the readside model from the events
+* "Compile" the DSL into stored procedures, triggers, and tables for the defined projections
+* The client API should be able to create the matching DDL on demand
+
 Postgresql's (PS) JSON datatype allows you to efficiently store, retrieve, and query against Json structures. Add in its general robustness and proven record in production and we have a strong candidate for usage as the backing event store in a CQRS architecture and a quasi-document database to boot.
 
-Beyond acting as a simple event store, we also want to exploit Postgresql to execute and build readside projections against events. The idea being that when an event is persisted to the events table PS would use database triggers to create or update readside projections of the event data. Fortunately, PS has support for asynchronous pub/sub communication in its sproc family, so we would not be forced to write the projections in the same transaction as inserting events. 
+Beyond acting as a simple event store, we also want to exploit Postgresql to execute and build readside projections against events. The idea being that when an event is persisted to the events table PS would use database triggers to create or update readside projections of the event data. Fortunately, PS has support for asynchronous pub/sub communication in its sproc capabilities, so we could specify synchronous or async projections on a case by case basis. 
 
 
 
@@ -20,22 +25,18 @@ Right off the bat, we'd have enough DDL to create an aggregate's and events tabl
 
 ## Generating the Schema
 
-I really want the application code to be able to spin up a brand new postgres schema on the fly to make application deployments, dev time work, and automated testing easier.
+I really want the application code to be able to spin up a brand new postgres schema on the fly to make application deployments, dev time work, and automated testing easier. 
 
 ## What am I worried about?
 
 Will this thing scale? We're gonna be adding some load to the database here. Most of my career has been about getting functionality *out* of the database and into the application tier. This feels a little bit like Back to the Future.
 
-Communicating whether or not a projection is up to date. The equivalent to RavenDb's WaitForNonStaleResults()
+Communicating whether or not a projection is up to date when we do async projections. The equivalent to RavenDb's WaitForNonStaleResults()
 
 Receiving events out of sequence. 
 
 Communicating exceptions and errors in building projections asynchronously
 
-
-## When would projections run?
-
-We could have simple projections run on AFTER INSERT/UPDATE triggers. More expensive projections could run using PS's async triggers.
 
 
 ## Defining the Projections
@@ -46,7 +47,7 @@ We've got a couple different choices. One thing I was kicking around yesterday w
 
 ### In Scala applications
 
-Ideally, I'd like to have the projections defined in the application programming language. In a fubumvc-esque C# client we would use Expression's to model the projection. If we're in Scala, I think we might be completely out of luck and forced to use strings.
+Ideally, I'd like to have the projections defined in the application programming language. In a fubumvc-esque C# client we would use Expression's to model the projection. I'm not sure if we could easily get away from strings in Scala.
 
 Maybe we could reverse engineer [Slick](http://slick.typesafe.com) if we're gonna be serious about this
 
@@ -55,5 +56,5 @@ Maybe we could reverse engineer [Slick](http://slick.typesafe.com) if we're gonn
 This would be relatively simple. We'd use a lot of Expression's and a new class scoped DSL holder to pull it off
 
 
-## Building the Schema
+aglksJF;LASKDJF;LKSDJF;LAKSDFJ;LAKSDFJasdf## Building the Schema
 
