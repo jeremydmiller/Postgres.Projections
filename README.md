@@ -8,8 +8,9 @@ A *spike* for utilizing Postgresql's Json type support for an event store backen
 ## Concept
 
 * Use Postgresql as an event store
+* Support event metadata/headers out of the box for more efficient querying?
 * Expose a declarative DSL to model how to update the readside model from the events
-* "Compile" the DSL into stored procedures, triggers, and tables for the defined projections
+* "Compile" the DSL into stored procedures, triggers, and tables for the projections defined in the DSL
 * The client API should be able to create the matching DDL on demand
 
 Postgresql's (PS) JSON datatype allows you to efficiently store, retrieve, and query against Json structures. Add in its general robustness and proven record in production and we have a strong candidate for usage as the backing event store in a CQRS architecture and a quasi-document database to boot.
@@ -25,7 +26,7 @@ Right off the bat, we'd have enough DDL to create an aggregate's and events tabl
 
 ## Generating the Schema
 
-I really want the application code to be able to spin up a brand new postgres schema on the fly to make application deployments, dev time work, and automated testing easier. 
+I really want the application code to be able to spin up a brand new postgres schema on the fly to make application deployments, dev time work, and automated testing easier. The client API would need to support generating and issuing the DDL. Optionally, we could do everything at build time.
 
 ## What am I worried about?
 
@@ -37,6 +38,10 @@ Receiving events out of sequence.
 
 Communicating exceptions and errors in building projections asynchronously
 
+Whether or not we can stay within postgres or have to call out to the real system to compile some types of projections
+
+Can we get away with making the projections against events, or will we sometimes have to use snapshots?
+
 
 
 ## Defining the Projections
@@ -47,14 +52,16 @@ We've got a couple different choices. One thing I was kicking around yesterday w
 
 ### In Scala applications
 
-Ideally, I'd like to have the projections defined in the application programming language. In a fubumvc-esque C# client we would use Expression's to model the projection. I'm not sure if we could easily get away from strings in Scala.
+Ideally, I'd like to have the projections defined in the application programming language. As in, declaratively map transformations kinda like AutoMapper from the Event to a readside ViewModel. In a fubumvc-esque C# client we would use Expression's to model the projection. I'm not sure if we could easily get away from strings in Scala.
 
-Maybe we could reverse engineer [Slick](http://slick.typesafe.com) if we're gonna be serious about this
+Maybe we could reverse engineer [Slick](http://slick.typesafe.com) if we're gonna be serious about this.
 
 ### In CSharp
 
 This would be relatively simple. We'd use a lot of Expression's and a new class scoped DSL holder to pull it off
 
+### Inside of Rake or Ruby Scripts at build time
 
-aglksJF;LASKDJF;LKSDJF;LAKSDFJ;LAKSDFJasdf## Building the Schema
+If we decide not to do the declarative projection DSL in the target application language, I think I'd vote for using a Ruby library and syntax. Ruby is very strong in string manipulation and our community is already heavily invested in Rake as is.
+
 
