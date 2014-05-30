@@ -3,19 +3,23 @@ CREATE TABLE TRACE (
 	text	varchar(250)
 );
 
-CREATE OR REPLACE FUNCTION play_trigger() RETURNS trigger AS $$
-	function transform(x){
-		return {wrapper: x.foo};
-	}
+DROP TABLE IF EXISTS Party_Projection CASCADE;
+CREATE TABLE Party_Projection (
+	id			uuid CONSTRAINT pk_party_projection PRIMARY KEY,
+	data		json NOT NULL	
+);
 
-	var plan = plv8.prepare( 'INSERT INTO TRACE (text) values ($1)', ['json'] );
+CREATE OR REPLACE FUNCTION update_Party_projection() RETURNS trigger AS $$
+	
 
-	plan.execute([transform(NEW.data)]);
+	//var plan = plv8.prepare( 'INSERT INTO Party_Projection (id, data) values ($1)', ['json'] );
+
+	//plan.execute([transform(NEW.data)]);
 $$ LANGUAGE plv8;
 
-DROP TRIGGER play_trigger ON events CASCADE;
-CREATE TRIGGER play_trigger AFTER INSERT ON events
-    FOR EACH ROW EXECUTE PROCEDURE play_trigger();
+DROP TRIGGER update_Party_projection ON events CASCADE;
+CREATE TRIGGER update_Party_projection AFTER INSERT ON events
+    FOR EACH ROW EXECUTE PROCEDURE update_Party_projection();
 
 
 --CREATE OR REPLACE FUNCTION json_play(left JSON, right JSON)
@@ -29,9 +33,29 @@ CREATE TRIGGER play_trigger AFTER INSERT ON events
 truncate streams cascade;
 
 
-select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'shopping', '{"foo": "bar"}');
-select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'shopping', '{"foo": "baz"}');
-select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'shopping', '{"foo": "bonkers"}');
+select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'quest', 'QuestStarted', 
+	'{"location": "Two Rivers", "members":["Rand", "Perrin", "Mat", "Lan"]}');
+
+select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'quest', 'TownReached', 
+	'{"location": "Taren Ferry"}');
+
+select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'quest', 'MemberLost', 
+	'{"member": "Thom"}');
+
+select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'quest', 'MemberJoined', 
+	'{"member": "Nynaeve"}');
+
+select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'quest', 'TownReached', 
+	'{"location": "Baerlon"}');
+
+select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'quest', 'EnemyDispatched', 
+	'{"location":"Shadar Logoth" "Trollocs": {"Mat":1, "Perrin":"2", "Rand":"3"}, "Fades":{"Lan":1}}');
+
+select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'quest', 'EnemyDispatched', 
+	'{"location":"Caemlyn" "Trollocs": {"Lan":3}, "Fades":{"Lan":1}}');
+
+
+
 
 select * from TRACE;
 
@@ -40,8 +64,3 @@ select * from TRACE;
 --select * from events;
 
 
-DROP TABLE IF EXISTS ShoppingCart_Projection CASCADE;
-CREATE TABLE ShoppingCart_Projection (
-	id			uuid CONSTRAINT pk_shoppingcart_projection PRIMARY KEY,
-	data		json NOT NULL	
-);
