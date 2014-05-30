@@ -21,8 +21,6 @@ RETURNS INT AS $$
 DECLARE
 	v integer;
 BEGIN
-	
-
 	SELECT max(version) INTO v FROM events WHERE stream_id = streamId;
 	IF v is NULL THEN
 		v := 1;
@@ -43,10 +41,3 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'shopping', '{"foo": "bar"}');
-select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'shopping', '{"foo": "baz"}');
-select append_event('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', 'shopping', '{"foo": "bonkers"}');
-
-select * from streams;
-
-select * from events;
