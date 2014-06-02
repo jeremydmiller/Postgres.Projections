@@ -21,12 +21,13 @@ CREATE TABLE events (
 	CONSTRAINT pk_events PRIMARY KEY(stream_id, version)
 );
 
-
+-- TODO: add an index on id and type. 
 DROP TABLE IF EXISTS projections CASCADE;
 CREATE TABLE projections (
-	id			uuid CONSTRAINT pk_party_projection PRIMARY KEY,
+	id			uuid,
 	type 		varchar(100) NOT NULL,
-	data		json NOT NULL	
+	data		json NOT NULL,
+	CONSTRAINT pk_projections PRIMARY KEY(id, type)
 );
 
 

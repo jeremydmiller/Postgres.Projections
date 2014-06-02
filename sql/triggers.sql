@@ -1,36 +1,57 @@
 
 
 
-CREATE OR REPLACE FUNCTION update_Party_projection() RETURNS trigger AS $$
-	var projector = function(id, data, eventType, projection){
-		var raw = plv8.execute('SELECT data FROM projections WHERE id = $1 AND type = $2', [id, projection.type]);
+CREATE OR REPLACE FUNCTION update_projections() RETURNS trigger AS $$
+	function ProjectionUpdater(){
+		var insertPlan = plv8.prepare('INSERT INTO projections (id, data, type) values ($1, $2, $3)');
+		var updatePlan = plv8.prepare('UPDATE projections SET data = $2 where id = $1 AND type = $3');
+		var findPlan = plv8.prepare('SELECT data FROM projections WHERE id = $1 AND type = $2');
 
-		var plan = null;
-		var state = null;
+		this.insert = function(id, data, type){
+			insertPlan.execute([id, data, type]);
+		};
 
-		var transform = projection[eventType];
+		this.update = function(id, data, type){
+			updatePlan.execute([id, data, type]);
+		};
 
-		if (raw.length == 1){
-			if (!transform){
-				return;
-			}
+		this.findExisting = function(id, type){
+			var raw = findPlan.execute([id, type]);
+			if (raw.length == 0) return null;
 
-			state = raw[0];
-			plan = plv8.prepare('UPDATE projections SET data = $2 where id = $1 AND type = $3');
-		}
-		else {
-			state = projection.init();
+			return raw[0].data;
+		};
 
-			plan = plv8.prepare('INSERT INTO projections (id, data, type) values ($1, $2, $3)');
-		}
-
-		
-		if (transform){
-			transform(state, data);
-		}
-
-		plan.execute([id, state, projection.type]);
+		return this;
 	}
+
+	// TODO -- move this to a prototype later?
+	function StreamAggregator(projection, updater){
+		this.update = function(id, data, eventType){
+
+plv8.elog(NOTICE, JSON.stringify(data));
+
+			var transform = projection[eventType];
+			var state = updater.findExisting(id, projection.type);
+
+			if (state == null){
+				state = projection.init();
+				if (transform){
+					transform(state, data);
+				}
+
+				updater.insert(id, state, projection.type);
+			}
+			else if (transform){
+				transform(state, data);
+
+				updater.update(id, state, projection.type);
+			}
+		};
+
+		return this;
+	}
+
 
 	var projection = {
 		type: 'Party',
@@ -40,17 +61,25 @@ CREATE OR REPLACE FUNCTION update_Party_projection() RETURNS trigger AS $$
 		},
 
 		QuestStarted: function(state, evt){
-			state.Started = true;
+			state.active = true;
+			state.location = evt.location; 
+		},
+
+		QuestEnded: function(state, evt){
+			state.active = false;
+			state.location = evt.location;
 		}
 	};
 
-	projector(NEW.stream_id, NEW.data, NEW.type, projection);
+	var aggregator = new StreamAggregator(projection, new ProjectionUpdater());
+
+	aggregator.update(NEW.stream_id, NEW.data, NEW.type);
 
 $$ LANGUAGE plv8;
 
-DROP TRIGGER update_Party_projection ON events CASCADE;
-CREATE TRIGGER update_Party_projection AFTER INSERT ON events
-    FOR EACH ROW EXECUTE PROCEDURE update_Party_projection();
+DROP TRIGGER update_projections ON events CASCADE;
+CREATE TRIGGER update_projections AFTER INSERT ON events
+    FOR EACH ROW EXECUTE PROCEDURE update_projections();
 
 
 truncate Trace cascade;
@@ -75,7 +104,6 @@ SELECT load_stream('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', '
 
 select * from projections;
 
-select * from Trace;
 
 
 
