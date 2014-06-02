@@ -1,83 +1,3 @@
-DROP TABLE IF EXISTS Trace CASCADE;
-CREATE TABLE Trace (
-	text		varchar(100)
-);
-
-DROP TABLE IF EXISTS streams CASCADE;
-CREATE TABLE streams (
-	id			uuid CONSTRAINT pk_streams PRIMARY KEY,
-	type		varchar(100) NOT NULL,
-	version		integer NOT NULL	
-);
-
-
-DROP TABLE IF EXISTS events;
-CREATE TABLE events (
-	stream_id	uuid REFERENCES streams ON DELETE CASCADE,
-	version		integer NOT NULL,
-	data		json NOT NULL,
-	type 		varchar(100) NOT NULL,
-	timestamp	timestamp without time zone default (now() at time zone 'utc') NOT NULL,
-	CONSTRAINT pk_events PRIMARY KEY(stream_id, version)
-);
-
--- TODO: add an index on id and type. 
-DROP TABLE IF EXISTS projections CASCADE;
-CREATE TABLE projections (
-	id			uuid,
-	type 		varchar(100) NOT NULL,
-	data		json NOT NULL,
-	CONSTRAINT pk_projections PRIMARY KEY(id, type)
-);
-
-DROP TABLE IF EXISTS projection_definitions CASCADE;
-CREATE TABLE projection_definitions (
-	name			varchar(100) CONSTRAINT pk_projection_definitions PRIMARY KEY,
-	definition		varchar(1000) NOT NULL
-);
-
-
--- stream_id UUID, stream_type varchar(100), data json
-CREATE OR REPLACE FUNCTION append_event(stream_id UUID, stream_type varchar, event_type varchar, data json) RETURNS int AS $$
-	var raw = plv8.execute('select version, type from streams where id = $1', [stream_id]);
-	var version = 1;
-	if (raw.length == 1){
-		version = parseInt(raw[0].version) + 1;
-		if (stream_type == null){
-			stream_type = raw[0].type;
-		}
-	};
-
-	if (version == 1){
-		plv8.execute('insert into streams (id, version, type) values ($1, $2, $3)', [stream_id, version, stream_type]);
-	}
-	else{
-		plv8.execute('update streams set version = $1 where id = $2', [version, stream_id]);
-	}
-
-	plv8.execute('insert into events (stream_id, version, data, type) values ($1, $2, $3, $4)', [stream_id, version, data, event_type]);
-
-	data.$type = event_type;
-
-    plv8.projector.project(stream_id, stream_type, data);
-
-	return version;
-$$ LANGUAGE plv8;
-
-
-
-CREATE OR REPLACE FUNCTION load_stream(id UUID, stream json)
-RETURNS VOID AS $$
-	var appender = plv8.find_function('append_event');
-
-	for (var i = 0; i < stream.events.length; i++){
-		var evt = stream.events[i];
-
-		appender(id, stream.type, evt.$type, evt);
-	}
-$$ LANGUAGE plv8;
-
-
 CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 	function ProjectionUpdater(){
 		var insertPlan = plv8.prepare('INSERT INTO projections (id, data, type) values ($1, $2, $3)');
@@ -104,8 +24,7 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 
 	function StreamAggregator(definition, updater){
 	
-		this.project = function(id, data){
-			var eventType = data.$type;
+		this.update = function(id, data, eventType){
 			var transform = definition[eventType];
 			var state = updater.findExisting(id, definition.$name);
 
@@ -125,7 +44,7 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 		};
 
 		this.mapApplicability = function(projector){
-			projector.storeByStream(definition.$stream, this);
+			//projector.storeByStream(definition.$stream);
 		};
 
 		
@@ -160,12 +79,12 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 
 		var projections = [];
 
-		self.storeByStream = function(stream_type, projection){
-			byStream.add(stream_type, projection);
+		self.storeByStream = function(streamType, projection){
+			byStream.add(streamType, projection);
 		};
 
-		self.storeByEvent = function(event_type, projection){
-			byEvent.add(event_type, projection);
+		self.storeByEvent = function(eventType, projection){
+			byEvent.add(eventType, projection);
 		};
 
 		var buildProjection = function(definition){
@@ -182,13 +101,16 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 			projections.push(projection);
 		};
 
-		self.project = function(id, stream_type, evt){
-			var projections = byStream.get(stream_type).concat(byEvent.get(evt.$type));
-
+		self.project = function(id, streamType, evt){
+		plv8.elog(NOTICE, 'DATA IS ' + JSON.stringify(evt));
+			var projections = byStream.get(streamType).concat(byEvent.get(evt.$type));
+plv8.elog(NOTICE, 'SECOND');
+/*
 			for (var i = 0; i < projections.length; i++){
-				projections[i].project(id, evt);
+				projections[i].projeßct(id, evt);
+				plv8.elog(NOTICE, 'RAN PROJECTION ' + i)ß;
 			}
-			
+			*/
 		};
 
 		return self;
@@ -264,5 +186,4 @@ SELECT load_stream('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', '
 
 
 select * from projections;
-
 
