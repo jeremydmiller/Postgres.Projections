@@ -21,13 +21,14 @@ CREATE TABLE events (
 	CONSTRAINT pk_events PRIMARY KEY(stream_id, version)
 );
 
+
 -- stream_id UUID, stream_type varchar(100), data json
 CREATE OR REPLACE FUNCTION append_event(streamId UUID, streamType varchar(100), eventType varchar(100), data json)
 RETURNS INT AS $$
 DECLARE
 	v integer;
 BEGIN
-	SELECT max(version) INTO v FROM events WHERE stream_id = streamId;
+	SELECT version INTO v FROM streams WHERE id = id;
 	IF v is NULL THEN
 		v := 1;
 
