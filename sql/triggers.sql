@@ -1,53 +1,40 @@
 
-DROP TABLE IF EXISTS Party_Projection CASCADE;
-CREATE TABLE Party_Projection (
-	id			uuid CONSTRAINT pk_party_projection PRIMARY KEY,
-	data		json NOT NULL	
-);
-
-
 
 
 CREATE OR REPLACE FUNCTION update_Party_projection() RETURNS trigger AS $$
 	var projector = function(id, data, eventType, projection){
-		var raw = plv8.execute('SELECT data FROM Party_Projection WHERE id = $1', [id]);
+		var raw = plv8.execute('SELECT data FROM projections WHERE id = $1 AND type = $2', [id, projection.type]);
 
 		var plan = null;
 		var state = null;
 
 		var transform = projection[eventType];
 
-
-
 		if (raw.length == 1){
-		plv8.elog(NOTICE, 'got current state');
 			if (!transform){
 				return;
 			}
 
 			state = raw[0];
-			plan = plv8.prepare('UPDATE Party_Projection SET data = $2 where id = $1');
+			plan = plv8.prepare('UPDATE projections SET data = $2 where id = $1 AND type = $3');
 		}
 		else {
-
-		plv8.elog(NOTICE, 'no current state');
 			state = projection.init();
 
-			plv8.elog(NOTICE, 'state is ' + JSON.stringify(state));
-			plan = plv8.prepare('INSERT INTO Party_Projection (id, data) values ($1, $2)');
+			plan = plv8.prepare('INSERT INTO projections (id, data, type) values ($1, $2, $3)');
 		}
 
 		
 		if (transform){
 			transform(state, data);
-
-			// TODO -- do a DELETE here
 		}
 
-		plan.execute([id, state]);
+		plan.execute([id, state, projection.type]);
 	}
 
 	var projection = {
+		type: 'Party',
+
 		init: function(){
 			return {};
 		},
@@ -68,7 +55,7 @@ CREATE TRIGGER update_Party_projection AFTER INSERT ON events
 
 truncate Trace cascade;
 truncate streams cascade;
-truncate Party_Projection cascade;
+truncate projections cascade;
 
 SELECT load_stream('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', '
 	{
@@ -86,7 +73,7 @@ SELECT load_stream('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', '
 ');
 
 
-select * from Party_Projection;
+select * from projections;
 
 select * from Trace;
 

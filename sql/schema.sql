@@ -22,6 +22,14 @@ CREATE TABLE events (
 );
 
 
+DROP TABLE IF EXISTS projections CASCADE;
+CREATE TABLE projections (
+	id			uuid CONSTRAINT pk_party_projection PRIMARY KEY,
+	type 		varchar(100) NOT NULL,
+	data		json NOT NULL	
+);
+
+
 -- stream_id UUID, stream_type varchar(100), data json
 CREATE OR REPLACE FUNCTION append_event(streamId UUID, streamType varchar(100), eventType varchar(100), data json)
 RETURNS INT AS $$
