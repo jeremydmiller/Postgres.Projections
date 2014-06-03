@@ -54,6 +54,8 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 		return this;
 	}
 
+
+
 	function ProjectionSet(){
 		this.add = function(key, value){
 			if (!this[key]){
@@ -72,7 +74,7 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 		}
 	}
 	
-	function EventProjector(updater){
+	function Projector(updater){
 		var self = this;
 
 		var byStream = new ProjectionSet();
@@ -118,7 +120,7 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 
 
 	var rows = plv8.execute('select definition from projection_definitions');
-	var projector = new EventProjector(new ProjectionUpdater());
+	var projector = new Projector(new ProjectionUpdater());
 	for (var i = 0; i < rows.length; i++){
 		eval(rows[i].definition);
 		projector.add(definition);
