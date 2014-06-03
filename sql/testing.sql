@@ -1,3 +1,30 @@
+\i build.sql;
+
+truncate table projection_definitions;
+insert into projection_definitions (name, definition) values ('Party', 
+'
+var definition = {
+		$name: "Party",
+		$type: "by-stream",
+		$stream: "Quest",
+
+		init: function(){
+			return {};
+		},
+
+		QuestStarted: function(state, evt){
+			state.active = true;
+			state.location = evt.location; 
+		},
+
+		QuestEnded: function(state, evt){
+			state.active = false;
+			state.location = evt.location;
+		}
+}
+
+');
+
 SELECT initialize_projections();
 
 truncate Trace cascade;

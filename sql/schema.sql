@@ -24,7 +24,7 @@ CREATE TABLE events (
 -- TODO: add an index on id and type. 
 DROP TABLE IF EXISTS projections CASCADE;
 CREATE TABLE projections (
-	id			uuid,
+	id			varchar(100) NOT NULL,
 	type 		varchar(100) NOT NULL,
 	data		json NOT NULL,
 	CONSTRAINT pk_projections PRIMARY KEY(id, type)
@@ -35,32 +35,6 @@ CREATE TABLE projection_definitions (
 	name			varchar(100) CONSTRAINT pk_projection_definitions PRIMARY KEY,
 	definition		varchar(1000) NOT NULL
 );
-
-
-
-
-
-
-CREATE OR REPLACE FUNCTION load_stream(id UUID, stream json)
-RETURNS VOID AS $$
-	var appender = plv8.find_function('append_event');
-
-	for (var i = 0; i < stream.events.length; i++){
-		var evt = stream.events[i];
-
-		appender(id, stream.type, evt.$type, evt.data);
-	}
-$$ LANGUAGE plv8;
-
-
-
-
-
-
-
-
-
-
 
 truncate table projection_definitions;
 insert into projection_definitions (name, definition) values ('Party', 
@@ -88,28 +62,6 @@ var definition = {
 ');
 
 
-SELECT initialize_projections();
 
-truncate Trace cascade;
-truncate streams cascade;
-truncate projections cascade;
-
-SELECT load_stream('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', '
-	{
-		"type":"Quest",
-		"events":[
-			{"$type":"QuestStarted", "data":{"location": "Emond''s Field", "members":["Rand", "Perrin", "Mat", "Lan"]}},
-			{"$type":"TownReached", "data":{"location": "Taren Ferry"}},
-			{"$type":"MemberLost", "data":{"member": "Thom"}},
-			{"$type":"MemberJoined", "data":{"member": "Nynaeve"}},
-			{"$type":"TownReached", "data":{"location": "Baerlon"}},
-			{"$type":"QuestEnded", "data":{"location":"Eye of the World"}}
-		]	
-
-	}
-');
-
-
-select * from projections;
 
 
