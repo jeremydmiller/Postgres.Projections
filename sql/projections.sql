@@ -1,19 +1,17 @@
 CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 	function ProjectionUpdater(){
-		var insertPlan = plv8.prepare('INSERT INTO projections (id, data, type) values ($1, $2, $3)');
-		var updatePlan = plv8.prepare('UPDATE projections SET data = $2 where id = $1 AND type = $3');
-		var findPlan = plv8.prepare('SELECT data FROM projections WHERE id = $1 AND type = $2');
-
 		this.insert = function(id, data, type){
-			insertPlan.execute([id, data, type]);
+			plv8.execute('INSERT INTO projections (id, data, type) values ($1, $2, $3)', [id, data, type]);
+		
 		};
 
 		this.update = function(id, data, type){
-			updatePlan.execute([id, data, type]);
+			plv8.execute('UPDATE projections SET data = $2 where id = $1 AND type = $3', [id, data, type]);
 		};
 
 		this.findExisting = function(id, type){
-			var raw = findPlan.execute([id, type]);
+			var raw = plv8.execute('SELECT data FROM projections WHERE id = $1 AND type = $2',[id, type]);
+
 			if (raw.length == 0) return null;
 
 			return raw[0].data;
@@ -24,7 +22,8 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 
 	function StreamAggregator(definition, updater){
 	
-		this.update = function(id, data, eventType){
+		this.project = function(id, data){
+			var eventType = data.$type;
 			var transform = definition[eventType];
 			var state = updater.findExisting(id, definition.$name);
 
@@ -36,15 +35,17 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 
 				updater.insert(id, state, definition.$name);
 			}
+			
 			else if (transform){
 				transform(state, data);
 
 				updater.update(id, state, definition.$name);
 			}
+			
 		};
 
 		this.mapApplicability = function(projector){
-			//projector.storeByStream(definition.$stream);
+			projector.storeByStream(definition.$stream, this);
 		};
 
 		
@@ -79,12 +80,12 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 
 		var projections = [];
 
-		self.storeByStream = function(streamType, projection){
-			byStream.add(streamType, projection);
+		self.storeByStream = function(stream_type, projection){
+			byStream.add(stream_type, projection);
 		};
 
-		self.storeByEvent = function(eventType, projection){
-			byEvent.add(eventType, projection);
+		self.storeByEvent = function(event_type, projection){
+			byEvent.add(event_type, projection);
 		};
 
 		var buildProjection = function(definition){
@@ -101,16 +102,13 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 			projections.push(projection);
 		};
 
-		self.project = function(id, streamType, evt){
-		plv8.elog(NOTICE, 'DATA IS ' + JSON.stringify(evt));
-			var projections = byStream.get(streamType).concat(byEvent.get(evt.$type));
-plv8.elog(NOTICE, 'SECOND');
-/*
+		self.project = function(id, stream_type, evt){
+			var projections = byStream.get(stream_type).concat(byEvent.get(evt.$type));
+
 			for (var i = 0; i < projections.length; i++){
-				projections[i].projeßct(id, evt);
-				plv8.elog(NOTICE, 'RAN PROJECTION ' + i)ß;
+				projections[i].project(id, evt);
 			}
-			*/
+			
 		};
 
 		return self;
@@ -129,61 +127,3 @@ plv8.elog(NOTICE, 'SECOND');
 	plv8.projector = projector;
 
 $$ LANGUAGE plv8;
-
-
-
-
-
-
-
-
-truncate table projection_definitions;
-insert into projection_definitions (name, definition) values ('Party', 
-'
-var definition = {
-		$name: "Party",
-		$type: "by-stream",
-		$stream: "Quest",
-
-		init: function(){
-			return {};
-		},
-
-		QuestStarted: function(state, evt){
-			state.active = true;
-			state.location = evt.location; 
-		},
-
-		QuestEnded: function(state, evt){
-			state.active = false;
-			state.location = evt.location;
-		}
-}
-
-');
-
-
-SELECT initialize_projections();
-
-truncate Trace cascade;
-truncate streams cascade;
-truncate projections cascade;
-
-SELECT load_stream('cdd82fef-2c14-46a5-a2f3-e866cc6f4568', '
-	{
-		"type":"Quest",
-		"events":[
-			{"$type":"QuestStarted", "data":{"location": "Emond''s Field", "members":["Rand", "Perrin", "Mat", "Lan"]}},
-			{"$type":"TownReached", "data":{"location": "Taren Ferry"}},
-			{"$type":"MemberLost", "data":{"member": "Thom"}},
-			{"$type":"MemberJoined", "data":{"member": "Nynaeve"}},
-			{"$type":"TownReached", "data":{"location": "Baerlon"}},
-			{"$type":"QuestEnded", "data":{"location":"Eye of the World"}}
-		]	
-
-	}
-');
-
-
-select * from projections;
-
