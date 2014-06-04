@@ -24,7 +24,7 @@ CREATE TABLE events (
 -- TODO: add an index on id and type. 
 DROP TABLE IF EXISTS projections CASCADE;
 CREATE TABLE projections (
-	id			varchar(100) NOT NULL,
+	id			uuid,
 	type 		varchar(100) NOT NULL,
 	data		json NOT NULL,
 	CONSTRAINT pk_projections PRIMARY KEY(id, type)
@@ -36,30 +36,7 @@ CREATE TABLE projection_definitions (
 	definition		varchar(1000) NOT NULL
 );
 
-truncate table projection_definitions;
-insert into projection_definitions (name, definition) values ('Party', 
-'
-var definition = {
-		$name: "Party",
-		$type: "by-stream",
-		$stream: "Quest",
 
-		init: function(){
-			return {};
-		},
-
-		QuestStarted: function(state, evt){
-			state.active = true;
-			state.location = evt.location; 
-		},
-
-		QuestEnded: function(state, evt){
-			state.active = false;
-			state.location = evt.location;
-		}
-}
-
-');
 
 
 

@@ -1,3 +1,5 @@
+/*
+
 define(['angular','angularMocks', 'app/app'], function (angular, mocks) {
   describe('MainCtrl', function () {
     var $scope, ctrl;
@@ -19,3 +21,5 @@ define(['angular','angularMocks', 'app/app'], function (angular, mocks) {
 
   })
 })
+
+*/

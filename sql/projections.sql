@@ -48,9 +48,6 @@ CREATE OR REPLACE FUNCTION initialize_projections() RETURNS VOID AS $$
 			projector.storeByStream(definition.$stream, this);
 		};
 
-		
-
-
 		return this;
 	}
 

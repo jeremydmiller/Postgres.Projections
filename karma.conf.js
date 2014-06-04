@@ -8,7 +8,7 @@ module.exports = function(config) {
 
 
     // frameworks to use
-    frameworks: ['jasmine', 'requirejs'],
+    frameworks: ['mocha', 'requirejs'],
 
 
     // list of files / patterns to load in the browser
@@ -21,7 +21,8 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-      'public/javascripts/main.js'
+      'public/javascripts/main.js',
+      'test/mocha/**/*.js'
     ],
 
 
