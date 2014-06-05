@@ -1,26 +1,3 @@
-/*
-
-
-
-// Projection across a stream of events
-require('postgres-projections')
-	.projectStream('stream type1')
-	.named('name of projection')
-	.async() // this will be optional
-	.by({
-		$init: function(){
-			return {count:0, members:[]};
-		},
- 
-		[Event Name]: function(state, evt){
-			// modify the existing state here
-		}
- 
-	}); 
-
-
-*/
-
 
 var assert = require("assert")
 var projector = require("../lib/postgres-projections");
@@ -36,7 +13,7 @@ describe('Projections by Stream', function(){
 			.named('Party')
 			.by({});
 
-		var state = projection.applyEvent(null, 'QuestStarted', {});
+		var state = projection.applyEvent(null, {$type: 'QuestStarted'});
 		assert.notEqual(null, state);
 	});
 
@@ -48,7 +25,8 @@ describe('Projections by Stream', function(){
 				$init: function(){
 					return {
 						active: true,
-						fatalities: 0
+						fatalities: 0,
+						members: []
 					}
 				},
 
@@ -61,21 +39,23 @@ describe('Projections by Stream', function(){
 				QuestEnded: function(state, evt){
 					state.active = false;
 					state.location = evt.location;
-				}
+				},
+
+
 			});
 
 
 		var projection = projector.projections['Party'];
 
-		describe('Project a single event', function(){
+		describe('Projecting a single event', function(){
 			it('should use the $init function if it exists to start the projection', function(){
-				var initial = projection.applyEvent(null, 'QuestStarted', {location: "Emond's Field", members: ['Rand', 'Perrin', 'Mat']});
+				var initial = projection.applyEvent(null, {$type: 'QuestStarted', location: "Emond's Field", members: ['Rand', 'Perrin', 'Mat']});
 				assert.equal(true, initial.active);
 				assert.equal(0, initial.fatalities);
 			});
 
 			it('should apply a single transform for the event type', function(){
-				var state = projection.applyEvent(null, 'QuestStarted', {location: "Emond's Field", members: ['Rand', 'Perrin', 'Mat']});
+				var state = projection.applyEvent(null, {$type: 'QuestStarted', location: "Emond's Field", members: ['Rand', 'Perrin', 'Mat']});
 				assert.equal(state.location, "Emond's Field");
 				assert.equal(3, state.members.length);
 			});
