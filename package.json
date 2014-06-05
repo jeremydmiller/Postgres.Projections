@@ -9,7 +9,8 @@
   },
   "devDependencies": {
     "mimosa-less": "*",
-    "mocha" : "latest"
+    "mocha" : "latest",
+    "chai": "*"
   }
 
 }
