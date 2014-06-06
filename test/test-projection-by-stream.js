@@ -3,9 +3,7 @@ var assert = require('chai').assert;
 var expect = require('chai').expect;
 var projector = require("../lib/postgres-projections");
 
-beforeEach(function(){
-	projector.reset();
-});
+
 
 describe('Projections by Stream', function(){
 	it('uses a default $init function if none is provided', function(){

@@ -1,9 +1,7 @@
 var assert = require("assert")
 var projector = require("../lib/postgres-projections");
 
-beforeEach(function(){
-	projector.reset();
-});
+
 
 describe('InMemoryStore', function(){
 	describe('SimpleStore', function(){
