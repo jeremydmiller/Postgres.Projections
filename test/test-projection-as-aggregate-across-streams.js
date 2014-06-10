@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var projector = require("../lib/postgres-projections");
+var projector = require("../lib/projector");
 
 describe('Aggregates across Streams', function(){
 	projector
