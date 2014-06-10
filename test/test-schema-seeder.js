@@ -15,7 +15,7 @@ describe('The Database Seeder', function(){
 
 				expect(result.tables).to.deep.equal(['pge_events', 'pge_modules', 'pge_projection_definitions', 'pge_projections', 'pge_streams']);
 				
-				expect(result.modules).to.deep.equal(['EventStore', 'Projector']);
+				expect(result.modules).to.deep.equal(['EventStore', 'Persistor', 'Projector']);
 
 				done();
 			})
