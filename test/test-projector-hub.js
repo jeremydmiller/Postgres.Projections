@@ -2,7 +2,6 @@ var assert = require('chai').assert;
 var expect = require('chai').expect;
 var projector = require("../lib/postgres-projections");
 
-var GitHubApi = require("github");
 
 describe('The Projector', function(){
 	beforeEach(function(){

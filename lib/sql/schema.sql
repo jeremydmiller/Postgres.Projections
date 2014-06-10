@@ -31,6 +31,12 @@ CREATE TABLE pge_projection_definitions (
 	definition		varchar(1000) NOT NULL
 );
 
+DROP TABLE IF EXISTS pge_modules CASCADE;
+CREATE TABLE pge_modules (
+	name			varchar(100) CONSTRAINT pk_pge_modules PRIMARY KEY,
+	definition		varchar(3000) NOT NULL
+);
+
 
 
 -- stream_id UUID, stream_type varchar(100), data json
