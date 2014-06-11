@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 
 var seeder = require('../lib/seeder');
-
+var _ = require('underscore-node');
 var connection = 'postgres://jeremill:@localhost/projections';
 
 describe('The Database Seeder', function(){
@@ -22,6 +22,15 @@ describe('The Database Seeder', function(){
 			.error(function(err){
 				done(err);
 			});
+	});
+
+	it.only('should be able to load all the projections from a folder path', function(){
+		var projector = require('../lib/pg-events');
+		projector.reset();
+
+		seeder.loadProjections({projection_folder: __dirname + '/projections'});
+
+		expect(projector.activeProjectionNames()).to.deep.equal(['Arrival', 'Party', 'Traveled']);
 	});
 
 });
