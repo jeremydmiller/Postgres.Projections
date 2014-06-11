@@ -29,10 +29,10 @@ var console = {
 }
 
 
-var persistor = require('Persistor');
+var persistor = require('persistor');
 
 // TODO -- add some way to put in the options for defaults
-plv8.events = require('EventStore').create(persistor, {});
+plv8.events = require('eventstore').create(persistor, {});
 
 $$ LANGUAGE plv8;
 

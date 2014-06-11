@@ -1,7 +1,7 @@
 
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var projector = require("../lib/projector");
+var projector = require("../lib/pg-events");
 
 
 

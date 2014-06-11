@@ -1,6 +1,6 @@
 var expect = require('chai').expect;
 
-var seeder = require('../lib/postgres-seeder');
+var seeder = require('../lib/seeder');
 
 var connection = 'postgres://jeremill:@localhost/projections';
 
@@ -15,7 +15,7 @@ describe('The Database Seeder', function(){
 
 				expect(result.tables).to.deep.equal(['pge_events', 'pge_modules', 'pge_projection_definitions', 'pge_projections', 'pge_streams']);
 				
-				expect(result.modules).to.deep.equal(['EventStore', 'Persistor', 'Projector']);
+				expect(result.modules).to.deep.equal(['eventstore', 'persistor', 'pg-events']);
 
 				done();
 			})

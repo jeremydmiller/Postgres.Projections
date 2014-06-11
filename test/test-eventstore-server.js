@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var EventStore = require("../lib/eventstore-server");
+var EventStore = require("../lib/server/eventstore");
 
 function InMemoryPersistor(){
 	this.id = 0;
@@ -39,7 +39,7 @@ function InMemoryPersistor(){
 
 describe("The EventStore Server Module", function(){
 	var persistor = new InMemoryPersistor();
-	var eventstore = require('../lib/eventstore-server').create(persistor, {streamType: 'foo'});
+	var eventstore = EventStore.create(persistor, {streamType: 'foo'});
 	var stream = null;
 	var event = null;
 

@@ -1,6 +1,6 @@
 var expect = require('chai').expect;
 
-var seeder = require('../lib/postgres-seeder');
+var seeder = require('../lib/seeder');
 var uuid = require('node-uuid');
 
 var connection = 'postgres://jeremill:@localhost/projections';
@@ -18,7 +18,7 @@ before(function(done){
 
 describe('EventStore End to End', function(done){
 	it('should be able to capture an event to the database', function(done){
-		var client = require('../lib/eventstore-client');
+		var client = require('../lib/client');
 		client.start({connection: connection});
 
 		var message = {
@@ -39,4 +39,5 @@ describe('EventStore End to End', function(done){
 				done(err);
 			});
 	});
+
 });
