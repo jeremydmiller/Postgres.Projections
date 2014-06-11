@@ -22,12 +22,17 @@ function require(name){
 	return newModule;
 }
 
+var console = {
+	log: function(text){
+		plv8.elog(NOTICE, text);
+	}
+}
+
 
 var persistor = require('Persistor');
 
 // TODO -- add some way to put in the options for defaults
 plv8.events = require('EventStore').create(persistor, {});
-
 
 $$ LANGUAGE plv8;
 
