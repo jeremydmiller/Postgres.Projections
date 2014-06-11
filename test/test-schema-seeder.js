@@ -11,7 +11,7 @@ function endsWith(str, suffix) {
 
 describe('The Database Seeder', function(){
 	it('Should be able to seed the basic database schema', function(done){
-		seeder.seedAll({connection: connection})
+		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
 			.then(function(result){
 
 				expect(result.tables).to.include('pge_events');
@@ -21,6 +21,20 @@ describe('The Database Seeder', function(){
 				expect(result.tables).to.include('pge_streams');
 
 				expect(result.modules).to.deep.equal(['eventstore', 'persistor', 'pg-events']);
+
+				done();
+			})
+			.error(function(err){
+				done(err);
+			});
+	});
+
+	it('should create new projection tables in the schema', function(done){
+		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
+			.then(function(result){
+
+				expect(result.tables).to.include('pge_projections_party');
+				expect(result.tables).to.include('pge_projections_arrival');
 
 				done();
 			})

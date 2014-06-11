@@ -4,9 +4,10 @@ var seeder = require('../lib/seeder');
 var uuid = require('node-uuid');
 
 var connection = 'postgres://jeremill:@localhost/projections';
+var projectionFolder = __dirname + '/projections';
 
 before(function(done){
-	return seeder.seedAll({connection: connection})
+	return seeder.seedAll({connection: connection, projection_folder: projectionFolder})
 		.then(function(){
 			done();
 		})
