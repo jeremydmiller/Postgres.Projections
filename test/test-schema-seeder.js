@@ -24,7 +24,7 @@ describe('The Database Seeder', function(){
 			});
 	});
 
-	it.only('should be able to load all the projections from a folder path', function(){
+	it('should be able to load all the projections from a folder path', function(){
 		var projector = require('../lib/pg-events');
 		projector.reset();
 
