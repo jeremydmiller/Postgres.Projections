@@ -26,9 +26,9 @@ describe('The Database Seeder', function(){
 
 	it('should be able to load all the projections from a folder path', function(){
 		var projector = require('../lib/pg-events');
-		projector.reset();
+		
 
-		seeder.loadProjections({projection_folder: __dirname + '/projections'});
+		var files = projector.loadProjectionsFromFolder(__dirname + '/projections');
 
 		expect(projector.activeProjectionNames()).to.deep.equal(['Arrival', 'Party', 'Traveled']);
 	});

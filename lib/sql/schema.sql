@@ -40,6 +40,8 @@ CREATE TABLE pge_modules (
 	definition		varchar(5000) NOT NULL
 );
 
+
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
