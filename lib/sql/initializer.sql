@@ -38,8 +38,6 @@ var persistor = require('persistor');
 // TODO -- add some way to put in the options for defaults
 plv8.events = require('eventstore').create(persistor, {});
 
-
-
 var results = plv8.execute("select definition from pge_projection_definitions");
 for (var i = 0; i < results.length; i++){
 	eval(results[i].definition);
