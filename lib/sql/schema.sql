@@ -40,7 +40,11 @@ CREATE TABLE pge_modules (
 	definition		varchar(5000) NOT NULL
 );
 
-
+DROP TABLE IF EXISTS pge_aggregates CASCADE;
+CREATE TABLE pge_aggregates (
+	name		varchar(100) CONSTRAINT pk_pge_aggregates PRIMARY KEY,
+	data		json NOT NULL
+);
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 

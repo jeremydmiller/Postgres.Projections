@@ -35,6 +35,8 @@ var console = {
 
 var persistor = require('persistor');
 var projector = require('pg-events');
+var projectionStore = require('projection-store');
+projector.store = projectionStore;
 
 // TODO -- add some way to put in the options for defaults
 plv8.events = require('eventstore')(persistor, projector, {});

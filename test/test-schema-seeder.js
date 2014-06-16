@@ -31,6 +31,7 @@ describe('The Database Seeder', function(){
 		expect(result.tables).to.include('pge_projection_definitions');
 		expect(result.tables).to.include('pge_projections');
 		expect(result.tables).to.include('pge_streams');
+		expect(result.tables).to.include('pge_aggregates');
 	});
 
 	it('should load the reused javascript modules', function(){
@@ -40,6 +41,7 @@ describe('The Database Seeder', function(){
 		expect(result.modules).to.include('stream-aggregator');
 		expect(result.modules).to.include('aggregate-projector');
 		expect(result.modules).to.include('event-projector');
+		expect(result.modules).to.include('projection-store');
 	});
 
 	it('should create new projection tables in the schema', function(){
