@@ -50,10 +50,22 @@ describe('The Database Seeder', function(){
 		expect(projector.activeProjectionNames()).to.deep.equal(['Arrival', 'Party', 'Traveled']);
 	});
 
+	it('should load the content for projections into the db', function(done){
+		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
+			.then(function(result){
+				expect(result.projections).to.include('Arrival');
+				expect(result.projections).to.include('Party');
+				expect(result.projections).to.include('Traveled');
+
+				done();
+			})
+			.error(function(err){
+				done(err);
+			});
+	});
+
 	it('should be able to generate all the DDL for projection tables', function(){
 		var DDL = seeder.generateDDL({projection_folder: projectionFolder});
-
-		console.log(DDL);
 
 		expect(DDL).to.include('DROP TABLE IF EXISTS pge_projections_Arrival CASCADE;');
 		expect(DDL).to.include('CREATE TABLE pge_projections_Arrival (');
