@@ -1,7 +1,6 @@
 var expect = require('chai').expect;
 
 var seeder = require('../lib/seeder');
-var _ = require('underscore-node');
 var connection = 'postgres://jeremill:@localhost/projections';
 var projectionFolder = __dirname + '/projections';
 
