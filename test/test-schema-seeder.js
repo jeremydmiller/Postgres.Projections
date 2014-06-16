@@ -10,15 +10,13 @@ function endsWith(str, suffix) {
 }
 
 describe('The Database Seeder', function(){
-	it('Should be able to seed the basic database schema', function(done){
-		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
-			.then(function(result){
+	var result = null;
 
-				expect(result.tables).to.include('pge_events');
-				expect(result.tables).to.include('pge_modules');
-				expect(result.tables).to.include('pge_projection_definitions');
-				expect(result.tables).to.include('pge_projections');
-				expect(result.tables).to.include('pge_streams');
+	before(function(done){
+		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
+			.then(function(r){
+				result = r;
+				
 
 				done();
 			})
@@ -27,35 +25,27 @@ describe('The Database Seeder', function(){
 			});
 	});
 
-	it('should load the reused javascript modules', function(done){
-		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
-			.then(function(result){
-				expect(result.modules).to.include('eventstore');
-				expect(result.modules).to.include('persistor');
-				expect(result.modules).to.include('pg-events');
-				expect(result.modules).to.include('stream-aggregator');
-				expect(result.modules).to.include('aggregate-projector');
-				expect(result.modules).to.include('event-projector');
 
-				done();
-			})
-			.error(function(err){
-				done(err);
-			});
+	it('Should be able to seed the basic database schema', function(){
+		expect(result.tables).to.include('pge_events');
+		expect(result.tables).to.include('pge_modules');
+		expect(result.tables).to.include('pge_projection_definitions');
+		expect(result.tables).to.include('pge_projections');
+		expect(result.tables).to.include('pge_streams');
 	});
 
-	it('should create new projection tables in the schema', function(done){
-		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
-			.then(function(result){
+	it('should load the reused javascript modules', function(){
+		expect(result.modules).to.include('eventstore');
+		expect(result.modules).to.include('persistor');
+		expect(result.modules).to.include('pg-events');
+		expect(result.modules).to.include('stream-aggregator');
+		expect(result.modules).to.include('aggregate-projector');
+		expect(result.modules).to.include('event-projector');
+	});
 
-				expect(result.tables).to.include('pge_projections_party');
-				expect(result.tables).to.include('pge_projections_arrival');
-
-				done();
-			})
-			.error(function(err){
-				done(err);
-			});
+	it('should create new projection tables in the schema', function(){
+		expect(result.tables).to.include('pge_projections_party');
+		expect(result.tables).to.include('pge_projections_arrival');
 	});
 
 	it('should be able to load all the projections from a folder path', function(){
@@ -65,18 +55,10 @@ describe('The Database Seeder', function(){
 		expect(projector.activeProjectionNames()).to.deep.equal(['Arrival', 'Party', 'Traveled']);
 	});
 
-	it('should load the content for projections into the db', function(done){
-		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
-			.then(function(result){
-				expect(result.projections).to.include('Arrival');
-				expect(result.projections).to.include('Party');
-				expect(result.projections).to.include('Traveled');
-
-				done();
-			})
-			.error(function(err){
-				done(err);
-			});
+	it('should load the content for projections into the db', function(){
+		expect(result.projections).to.include('Arrival');
+		expect(result.projections).to.include('Party');
+		expect(result.projections).to.include('Traveled');
 	});
 
 	it('should be able to generate all the DDL for projection tables', function(){
