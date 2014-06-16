@@ -23,9 +23,8 @@ describe('EventStore End to End', function(done){
 		client.start({connection: connection});
 
 		var message = {
-			type: 'QuestStarted',
 			streamType: 'Quest',
-			data: {location: "Emond's Field", $id: uuid.v4()}
+			data: {location: "Emond's Field", $id: uuid.v4(), $type: 'QuestStarted'}
 		};
 
 		return client.startStream(message)

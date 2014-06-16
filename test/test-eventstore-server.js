@@ -37,17 +37,32 @@ function InMemoryPersistor(){
 	return this;
 }
 
+function InMemoryProjector(){
+	this.events = [];
+
+	this.reset = function(){
+		this.events = [];
+	};
+
+	this.captureEvent = function(id, type, evt){
+		this.events.push({id: id, type: type, evt: evt});
+	};
+
+	return this;
+}
+
 describe("The EventStore Server Module", function(){
 	var persistor = new InMemoryPersistor();
-	var eventstore = EventStore.create(persistor, {streamType: 'foo'});
+	var projector = new InMemoryProjector();
+	var eventstore = new EventStore(persistor, projector, {streamType: 'foo'});
 	var stream = null;
 	var event = null;
-
 
 
 	describe('When storing an event for a new stream with explicits for stream type and event id', function(){
 		beforeEach(function(){
 			persistor.reset();
+			projector.reset();
 
 			eventstore.store({
 				id: 1,
@@ -72,7 +87,9 @@ describe("The EventStore Server Module", function(){
 			expect(event).to.deep.equal({location: 'Rivendell', $id: 4, $type: 'QuestStarted'});
 		});
 
-
+		it('should delegate to the projection', function(){
+			expect(projector.events[0]).to.deep.equal({id: 1, type: 'bar', evt: {location: 'Rivendell', $id:4, $type: 'QuestStarted'}});
+		});
 	});
 
 	describe('When storing an event for a new stream with no stream type or event id', function(){
