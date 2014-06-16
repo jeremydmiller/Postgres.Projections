@@ -6,6 +6,10 @@ var module = {};
 var exports = null;
 
 function require(name){
+	var parts = name.split('/');
+	name = parts[parts.length - 1].replace(".js", "");
+
+
 	if ($modules.hasOwnProperty(name)){
 		return $modules[name];
 	}
@@ -33,6 +37,14 @@ var persistor = require('persistor');
 
 // TODO -- add some way to put in the options for defaults
 plv8.events = require('eventstore').create(persistor, {});
+
+
+
+var results = plv8.execute("select definition from pge_projection_definitions");
+for (var i = 0; i < results.length; i++){
+	eval(results[i].definition);
+}
+
 
 $$ LANGUAGE plv8;
 

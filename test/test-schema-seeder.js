@@ -20,7 +20,22 @@ describe('The Database Seeder', function(){
 				expect(result.tables).to.include('pge_projections');
 				expect(result.tables).to.include('pge_streams');
 
-				expect(result.modules).to.deep.equal(['eventstore', 'persistor', 'pg-events']);
+				done();
+			})
+			.error(function(err){
+				done(err);
+			});
+	});
+
+	it('should load the reused javascript modules', function(done){
+		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
+			.then(function(result){
+				expect(result.modules).to.include('eventstore');
+				expect(result.modules).to.include('persistor');
+				expect(result.modules).to.include('pg-events');
+				expect(result.modules).to.include('stream-aggregator');
+				expect(result.modules).to.include('aggregate-projector');
+				expect(result.modules).to.include('event-projector');
 
 				done();
 			})
