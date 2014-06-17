@@ -29,7 +29,7 @@ describe('EventStore End to End', function(done){
 			data: {location: "Emond's Field", $id: uuid.v4(), $type: 'QuestStarted'}
 		};
 
-		return client.startStream(message)
+		return client.append(message)
 			.then(function(result){
 				expect(result.id).to.not.be.a('null');
 				return client.fetchStream(result.id);
@@ -46,7 +46,7 @@ describe('EventStore End to End', function(done){
 	it('should be able to capture an event for a new stream to the database with the simpler usage', function(done){
 		var evt = {location: "Emond's Field", $id: uuid.v4(), $type: 'QuestStarted'};
 
-		return client.startStream('Quest', evt)
+		return client.append('Quest', evt)
 			.then(function(result){
 				expect(result.id).to.not.be.a('null');
 				return client.fetchStream(result.id);
@@ -67,7 +67,7 @@ describe('EventStore End to End', function(done){
 			data: {location: "Emond's Field", $type: 'QuestStarted'}
 		};
 
-		return client.startStream(message)
+		return client.append(message)
 			.then(function(result){
 				return client.fetchStream(result.id);
 			})
@@ -98,7 +98,7 @@ describe('EventStore End to End', function(done){
 			traveled: 5
 		};
 
-		return client.startStream(message)
+		return client.append(message)
 			.then(function(result){
 				return client.append({
 					id: result.id,
@@ -135,7 +135,7 @@ describe('EventStore End to End', function(done){
 			traveled: 5
 		};
 
-		return client.startStream(message)
+		return client.append(message)
 			.then(function(result){
 				return client.append(result.id, evt)
 				.then(function(x){
@@ -168,7 +168,7 @@ describe('EventStore End to End', function(done){
 			traveled: 5
 		};
 
-		return client.startStream(message)
+		return client.append(message)
 			.then(function(result){
 				return client.append({
 					id: result.id,
