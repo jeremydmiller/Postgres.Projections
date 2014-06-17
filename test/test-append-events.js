@@ -104,9 +104,9 @@ describe('EventStore End to End', function(done){
 					id: result.id,
 					data: evt
 				})
-				.then(function(version){
+				.then(function(x){
 				// 2nd event in the stream
-					expect(version).to.equal(2);
+					expect(x.version).to.equal(2);
 					return client.fetchStream(result.id);
 				});
 			})
@@ -138,9 +138,9 @@ describe('EventStore End to End', function(done){
 		return client.startStream(message)
 			.then(function(result){
 				return client.append(result.id, evt)
-				.then(function(version){
+				.then(function(x){
 				// 2nd event in the stream
-					expect(version).to.equal(2);
+					expect(x.version).to.equal(2);
 					return client.fetchStream(result.id);
 				});
 			})
@@ -174,9 +174,9 @@ describe('EventStore End to End', function(done){
 					id: result.id,
 					data: evt
 				})
-				.then(function(version){
+				.then(function(r){
 				// 2nd event in the stream
-					expect(version).to.equal(2);
+					expect(r.version).to.equal(2);
 					return client.fetchStream(result.id);
 				});
 			})
