@@ -40,6 +40,30 @@ describe('EventStore End to End', function(done){
 			});
 	});
 
+	it('should be able to capture an event for a new stream to the database without an event id', function(done){
+		var message = {
+			streamType: 'Quest',
+			data: {location: "Emond's Field", $type: 'QuestStarted'}
+		};
+
+		return client.startStream(message)
+			.then(function(result){
+				return client.fetchStream(result.id);
+			})
+			.then(function(result){
+				expect(result[0].$id).to.not.be.a('null');
+
+				delete(result[0].$id);
+
+				expect(result[0]).to.deep.equal(message.data);
+				done();
+			})
+			.error(function(err){
+				done(err);
+			});
+	});
+
+
 	it('should append an event to an existing stream to the database', function(done){
 		var message = {
 			streamType: 'Quest',
@@ -66,6 +90,8 @@ describe('EventStore End to End', function(done){
 				});
 			})
 			.then(function(stream){
+				delete stream[1].$id;
+
 				expect(stream[1]).to.deep.equal(evt);
 
 				done();
