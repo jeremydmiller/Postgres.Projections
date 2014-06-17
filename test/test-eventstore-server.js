@@ -67,8 +67,7 @@ describe("The EventStore Server Module", function(){
 			eventstore.store({
 				id: 1,
 				type: 'bar',
-				data: {location: 'Rivendell', $type: 'QuestStarted'},
-				eventId: 4
+				data: {location: 'Rivendell', $type: 'QuestStarted', $id: 4}
 			});
 
 			stream = persistor.findStream(1);
@@ -128,8 +127,7 @@ describe("The EventStore Server Module", function(){
 
 			eventstore.store({
 				id: 1,
-				data: {location: 'Moria', $type: 'TownReached'},
-				eventId: 6
+				data: {location: 'Moria', $type: 'TownReached', $id: 6}
 			});
 
 			stream = persistor.findStream(1);
