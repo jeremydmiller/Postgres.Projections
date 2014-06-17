@@ -13,6 +13,10 @@ function InMemoryPersistor(){
 	}
 
 	this.insertStream = function(id, version, type){
+		if (version == null){
+			throw new Error('version is null');
+		}
+
 		this.data[id] = {id: id, version: version, type: type, events:[]};
 	}
 
