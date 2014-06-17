@@ -6,6 +6,7 @@ var uuid = require('node-uuid');
 var connection = 'postgres://jeremill:@localhost/projections';
 var projectionFolder = __dirname + '/projections';
 
+
 before(function(done){
 	return seeder.seedAll({connection: connection, projection_folder: projectionFolder})
 		.then(function(){
@@ -17,13 +18,14 @@ before(function(done){
 		});
 });
 
+
 describe('EventStore End to End', function(done){
 	var client = require('../lib/client');
 	client.start({connection: connection});
 
 	it('should be able to capture an event for a new stream to the database', function(done){
 		var message = {
-			streamType: 'Quest',
+			type: 'Quest',
 			data: {location: "Emond's Field", $id: uuid.v4(), $type: 'QuestStarted'}
 		};
 
@@ -61,7 +63,7 @@ describe('EventStore End to End', function(done){
 
 	it('should be able to capture an event for a new stream to the database without an event id', function(done){
 		var message = {
-			streamType: 'Quest',
+			type: 'Quest',
 			data: {location: "Emond's Field", $type: 'QuestStarted'}
 		};
 
@@ -86,7 +88,7 @@ describe('EventStore End to End', function(done){
 
 	it('should append an event to an existing stream to the database', function(done){
 		var message = {
-			streamType: 'Quest',
+			type: 'Quest',
 			data: {location: "Emond's Field", $id: uuid.v4(), $type: 'QuestStarted'}
 		};
 
@@ -123,7 +125,7 @@ describe('EventStore End to End', function(done){
 
 	it('should append an event to an existing stream to the database with the overload', function(done){
 		var message = {
-			streamType: 'Quest',
+			type: 'Quest',
 			data: {location: "Emond's Field", $id: uuid.v4(), $type: 'QuestStarted'}
 		};
 
@@ -156,7 +158,7 @@ describe('EventStore End to End', function(done){
 
 	it('should append an event to an existing stream to the database without an explicit id', function(done){
 		var message = {
-			streamType: 'Quest',
+			type: 'Quest',
 			data: {location: "Emond's Field", $type: 'QuestStarted'}
 		};
 
