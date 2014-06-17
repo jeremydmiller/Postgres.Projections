@@ -84,7 +84,6 @@ describe('EventStore End to End', function(done){
 				})
 				.then(function(version){
 				// 2nd event in the stream
-				console.log(JSON.stringify(version));
 					expect(version).to.equal(2);
 					return client.fetchStream(result.id);
 				});
@@ -101,6 +100,40 @@ describe('EventStore End to End', function(done){
 			});
 	});
 
+	it('should append an event to an existing stream to the database without an explicit id', function(done){
+		var message = {
+			streamType: 'Quest',
+			data: {location: "Emond's Field", $type: 'QuestStarted'}
+		};
 
+		var evt = {
+			$type: 'TownReached',
+			location: 'Baerlon',
+			traveled: 5
+		};
+
+		return client.startStream(message)
+			.then(function(result){
+				return client.append({
+					id: result.id,
+					data: evt
+				})
+				.then(function(version){
+				// 2nd event in the stream
+					expect(version).to.equal(2);
+					return client.fetchStream(result.id);
+				});
+			})
+			.then(function(stream){
+				delete stream[1].$id;
+
+				expect(stream[1]).to.deep.equal(evt);
+
+				done();
+			})
+			.error(function(err){
+				done(err);
+			});
+	});
 
 });
