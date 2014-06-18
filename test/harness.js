@@ -1,6 +1,7 @@
 var connection = 'postgres://jeremill:@localhost/projections';
 var projectionFolder = __dirname + '/projections';
 var Promise = require("bluebird");
+var expect = require('chai').expect;
 
 var client = require('../lib/client');
 client.start({connection: connection});
@@ -48,27 +49,26 @@ function Harness(){
 	this.view = function(id, view, func){
 		this.steps.push(function(promise){
 			return promise.then(function(){
-				return client.fetchView(id, view)
+				return client.findView(id, view)
 					.then(func);
 			});
 		});
 	}
 
-	this.execute = function(done, client){
+	this.viewShouldBe = function(id, view, expected){
+		this.view(id, view, function(v){
+			expect(v).to.deep.equal(expected);
+		});
+	}
+
+	this.execute = function(client){
 		var promise = Promise.resolve(null);
 
 		this.steps.forEach(function(step){
 			promise = step(promise);
 		});
 
-		return promise.finally(function(){
-			done();
-		})
-		.error(function(err){
-			console.log(err);
-			done(err);
-		});
-
+		return promise;
 	}
 }
 
@@ -77,12 +77,9 @@ function Harness(){
 module.exports = {
 	seeded: false,
 
-	seed: function(done){
+	seed: function(){
 		if (this.seeded){
-			return Promise.resolve(this.result)
-				.finally(function(){
-					done();
-				});
+			return Promise.resolve(this.projections);
 		}
 
 		var seeder = require('../lib/seeder');
@@ -93,32 +90,19 @@ module.exports = {
 				this.projections = result; 
 				
 				return result;
-			})
-			.finally(function(){
-				done();
-			})
-			.error(function(err){
-				console.log(err);
-				done(err);
 			});
+
 	},
 
 	cleanAll: function(done){
-		return client.cleanAll()
-			.then(function(){
-				done();
-			})
-			.error(function(err){
-				console.log(err);
-				done(err);
-			});
+		return client.cleanAll();
 	},
 
-	scenario: function(done, configure){
+	scenario: function(configure){
 		var harness = new Harness();
 		configure(harness);
 
-		return harness.execute(done, client);
+		return harness.execute(client);
 	}
 };
 

@@ -6,13 +6,17 @@ require("../../lib/pg-events")
 			return {
 				active: true,
 				traveled: 0,
-				location: null
+				location: null,
+				members: []
 			}
 		},
 
 		QuestStarted: function(state, evt){
 			state.active = true;
-			state.location = evt.location; 
+			state.location = evt.location;
+			state.members = evt.members;
+
+			state.members.sort();
 		},
 
 		TownReached: function(state, evt){
@@ -28,6 +32,22 @@ require("../../lib/pg-events")
 			state.active = false;
 			state.location = evt.location;
 		},
+
+		MembersJoined: function(state, evt){
+			state.members = state.members.concat(evt.members);
+			state.members.sort();
+		},
+
+		MembersDeparted: function(state, evt){
+			state.location = evt.location;
+
+			for (var i = 0; i < evt.members.length; i++){
+				var index = state.members.indexOf(evt.members[i]);
+				state.members.splice(index, 1);
+			}
+
+			state.members.sort();
+		}
 
 
 	});

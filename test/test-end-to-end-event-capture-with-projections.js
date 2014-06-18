@@ -4,6 +4,8 @@ var expect = require('chai').expect;
 var quest = require('./quest-events');
 var harness = require('./harness');
 
+require('when/monitor/console');
+
 var e1_1 = quest.QuestStarted("Emond's Field", ['Rand', 'Perrin', 'Mat', 'Thom', 'Egwene', 'Moiraine']);
 var e1_2 = quest.EndOfDay(5);
 var e1_3 = quest.TownReached('Baerlon', 11);
@@ -27,18 +29,18 @@ var e3_4 = quest.MembersDeparted('Moria', ['Gandolf']);
 
 
 function scenario(text, func){
-	it(text, function(done){
-		harness.scenario(done, func);
+	it(text, function(){
+		return harness.scenario(func);
 	});
 }
 
 describe('End to End Event Capture and Projections', function(){
-	before(function(done){
-		harness.seed(done);
+	before(function(){
+		return harness.seed();
 	});
 
-	beforeEach(function(done){
-		return harness.cleanAll(done);
+	beforeEach(function(){
+		return harness.cleanAll();
 	});
 
 	scenario('can capture events for a new stream', function(x){
@@ -81,6 +83,26 @@ describe('End to End Event Capture and Projections', function(){
 
 			expect(s.version).to.equal(3);
 			expect(s.type).to.equal('Quest');
+		});
+	});
+
+	scenario('can update a view across a stream to reflect latest', function(x){
+		var id = uuid.v4();
+
+		x.append(id, 'Quest', e1_1, e1_2, e1_3);
+		x.viewShouldBe(id, 'Party', {
+			active: true,
+			location: 'Baerlon',
+			traveled: 16,
+			members: ['Egwene', 'Mat', 'Moiraine', 'Perrin', 'Rand', 'Thom']
+		});
+
+		x.append(id, e1_4, e1_5);
+		x.viewShouldBe(id, 'Party', {
+			active: true,
+			location: 'Shadar Logoth',
+			traveled: 31,
+			members: ['Egwene', 'Mat', 'Moiraine', 'Perrin', 'Rand']
 		});
 	});
 

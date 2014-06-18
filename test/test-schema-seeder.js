@@ -10,8 +10,8 @@ function endsWith(str, suffix) {
 describe('The Database Seeder', function(){
 	var result = null;
 
-	before(function(done){
-		harness.seed(done).then(function(r){
+	before(function(){
+		return harness.seed().then(function(r){
 			result = r;
 		});
 	});

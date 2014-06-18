@@ -28,3 +28,8 @@ CREATE OR REPLACE FUNCTION pge_fetch_stream(id UUID) RETURNS JSON AS $$
 
 	return stream;
 $$ LANGUAGE plv8;
+
+
+CREATE OR REPLACE FUNCTION pge_find_view(id UUID, type varchar(100)) RETURNS JSON AS $$
+	return plv8.projector.store.find(type, id);
+$$ LANGUAGE plv8;
