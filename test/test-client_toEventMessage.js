@@ -36,13 +36,17 @@ describe('The client.toEventMessage() method', function(){
 	});
 
 
+
 	it('should recognize that a string argument is type', function(){
 		var expected = {
 			type: 'Quest',
 			data: [{$type: 'QuestStarted'}]
 		};
 
-		expect(client.toEventMessage(['Quest', expected.data[0]])).to.deep.equal(expected);
+		var message = client.toEventMessage(['Quest', expected.data[0]]);
+		delete message.id;
+
+		expect(message).to.deep.equal(expected);
 	});
 
 	it('should combine the rest of the arguments into the event array', function(){
@@ -51,15 +55,19 @@ describe('The client.toEventMessage() method', function(){
 			data: [{$type: 'QuestStarted'}, {$type: 'TownReached'}, {$type: 'EndOfDay'}]
 		};
 
-		expect(client.toEventMessage(['Quest', expected.data[0], expected.data[1], expected.data[2]])).to.deep.equal(expected);
+		var message = client.toEventMessage(['Quest', expected.data[0], expected.data[1], expected.data[2]]);
+		delete message.id;
+
+		expect(message).to.deep.equal(expected);
 	});
 
 	it('should accept an array of events as the last argument as well', function(){
 		var expected = {
+			id: uuid.v4(),
 			type: 'Quest',
 			data: [{$type: 'QuestStarted'}, {$type: 'TownReached'}, {$type: 'EndOfDay'}]
 		};
 
-		expect(client.toEventMessage(['Quest', expected.data])).to.deep.equal(expected);
+		expect(client.toEventMessage([expected.id, 'Quest', expected.data])).to.deep.equal(expected);
 	});
 });

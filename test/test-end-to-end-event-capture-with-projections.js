@@ -2,10 +2,7 @@ var uuid = require('node-uuid');
 var client = require('../lib/client');
 var expect = require('chai').expect;
 var quest = require('./quest-events');
-var seeder = require('../lib/seeder');
-
-var connection = 'postgres://jeremill:@localhost/projections';
-var projectionFolder = __dirname + '/projections';
+var harness = require('./harness');
 
 var e1_1 = quest.QuestStarted("Emond's Field", ['Rand', 'Perrin', 'Mat', 'Thom', 'Egwene', 'Moiraine']);
 var e1_2 = quest.EndOfDay(5);
@@ -28,33 +25,63 @@ var e3_2 = quest.EndOfDay(7);
 var e3_3 = quest.TownReached('Moria', 111);
 var e3_4 = quest.MembersDeparted('Moria', ['Gandolf']);
 
-describe.only('End to End Event Capture and Projections', function(){
-	var client = require('../lib/client');
-	client.start({connection: connection});
 
+function scenario(text, func){
+	it(text, function(done){
+		harness.scenario(done, func);
+	});
+}
+
+describe('End to End Event Capture and Projections', function(){
 	before(function(done){
-		return seeder.seedAll({connection: connection, projection_folder: projectionFolder})
-			.then(function(){
-				done();
-			})
-			.error(function(err){
-				console.log(err);
-				done(err);
-			});
+		harness.seed(done);
 	});
 
 	beforeEach(function(done){
-		return client.cleanAll()
-			.then(function(){
-				done();
-			})
-			.error(function(err){
-				console.log(err);
-				done(err);
-			});
+		return harness.cleanAll(done);
 	});
 
-	it('is okay', function(){
-		expect(1).to.equal(1);
+	scenario('can capture events for a new stream', function(x){
+		var id = uuid.v4();
+
+		x.append(id, 'Quest', e1_1, e1_2, e1_3);
+		x.stream(id, function(x){
+			expect(x.events[0]).to.deep.equal(e1_1);
+			expect(x.events[1]).to.deep.equal(e1_2);
+			expect(x.events[2]).to.deep.equal(e1_3);
+
+			expect(x.version).to.equal(3);
+			expect(x.type).to.equal('Quest');
+		});
 	});
+
+
+	scenario('can capture events for a new stream and auto assign the id', function(x){
+		x.append('Quest', e1_1, e1_2, e1_3);
+		x.stream(function(s){
+			expect(s.events[0]).to.deep.equal(e1_1);
+			expect(s.events[1]).to.deep.equal(e1_2);
+			expect(s.events[2]).to.deep.equal(e1_3);
+
+			expect(s.version).to.equal(3);
+			expect(s.type).to.equal('Quest');
+		});
+	});
+
+	scenario('can append events to an existing stream', function(x){
+		var id = uuid.v4();
+
+		x.append(id, 'Quest', e1_1);
+		x.append(id, e1_2, e1_3);
+
+		x.stream(function(s){
+			expect(s.events[0]).to.deep.equal(e1_1);
+			expect(s.events[1]).to.deep.equal(e1_2);
+			expect(s.events[2]).to.deep.equal(e1_3);
+
+			expect(s.version).to.equal(3);
+			expect(s.type).to.equal('Quest');
+		});
+	});
+
 });

@@ -1,8 +1,7 @@
 var expect = require('chai').expect;
-
-var seeder = require('../lib/seeder');
-var connection = 'postgres://jeremill:@localhost/projections';
 var projectionFolder = __dirname + '/projections';
+var harness = require('./harness');
+var seeder = require('../lib/seeder');
 
 function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
@@ -12,16 +11,9 @@ describe('The Database Seeder', function(){
 	var result = null;
 
 	before(function(done){
-		seeder.seedAll({connection: connection, projection_folder: projectionFolder})
-			.then(function(r){
-				result = r;
-				
-
-				done();
-			})
-			.error(function(err){
-				done(err);
-			});
+		harness.seed(done).then(function(r){
+			result = r;
+		});
 	});
 
 
