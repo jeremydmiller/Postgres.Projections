@@ -50,6 +50,11 @@ for (var i = 0; i < results.length; i++){
 
 plv8.projector = projector;
 
+plv8.cleanAll = function(){
+	plv8.execute('truncate table pge_streams CASCADE;');
+	projectionStore.cleanAll();
+}
+
 
 $$ LANGUAGE plv8;
 
