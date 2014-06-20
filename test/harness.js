@@ -49,7 +49,7 @@ function Harness(){
 	this.view = function(id, view, func){
 		this.steps.push(function(promise){
 			return promise.then(function(){
-				return client.findView(id, view)
+				return client.fetchView(id, view)
 					.then(func);
 			});
 		});
