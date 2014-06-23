@@ -4,7 +4,7 @@ var Promise = require("bluebird");
 var expect = require('chai').expect;
 
 var client = require('../lib/pg-eventstore');
-client.start({connection: connection});
+client.start({connection: connection, projection_folder: projectionFolder});
 
 function Harness(){
 	this.steps = [];
@@ -82,9 +82,7 @@ module.exports = {
 			return Promise.resolve(this.projections);
 		}
 
-		var seeder = require('../lib/seeder');
-
-		return seeder.seedAll({connection: connection, projection_folder: projectionFolder})
+		return client.config.seedAll({connection: connection, projection_folder: projectionFolder})
 			.then(function(result){
 				this.seeded = true;
 				this.projections = result; 
