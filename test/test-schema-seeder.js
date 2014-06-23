@@ -29,7 +29,7 @@ describe('The Database Seeder', function(){
 	it('should load the reused javascript modules', function(){
 		expect(result.modules).to.include('eventstore');
 		expect(result.modules).to.include('persistor');
-		expect(result.modules).to.include('pg-events');
+		expect(result.modules).to.include('projections');
 		expect(result.modules).to.include('stream-aggregator');
 		expect(result.modules).to.include('aggregate-projector');
 		expect(result.modules).to.include('event-projector');
@@ -42,7 +42,7 @@ describe('The Database Seeder', function(){
 	});
 
 	it('should be able to load all the projections from a folder path', function(){
-		var projector = require('../lib/pg-events');
+		var projector = require('../lib/projections');
 		var files = projector.loadProjectionsFromFolder(projectionFolder);
 
 		expect(projector.activeProjectionNames()).to.deep.equal(['Arrival', 'Party', 'Traveled']);

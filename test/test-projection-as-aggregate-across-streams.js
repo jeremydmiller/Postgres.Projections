@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
 var expect = require('chai').expect;
-var projector = require("../lib/pg-events");
+var projector = require("../lib/projections");
 
 describe('Aggregates across Streams', function(){
 	projector

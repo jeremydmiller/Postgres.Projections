@@ -34,7 +34,7 @@ var console = {
 
 
 var persistor = require('persistor');
-var projector = require('pg-events');
+var projector = require('projections');
 var projectionStore = require('projection-store');
 projector.store = projectionStore;
 

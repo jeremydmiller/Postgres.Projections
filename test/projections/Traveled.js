@@ -1,4 +1,4 @@
-require("../../lib/pg-events")
+require("../../lib/projections")
 	.aggregate('Traveled')
 	.by({
 		$init: function(){

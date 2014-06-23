@@ -1,4 +1,4 @@
-require("../../lib/pg-events")
+require("../../lib/projections")
 	.projectEvent('TownReached')
 	.named('Arrival')
 	.by(function(evt){

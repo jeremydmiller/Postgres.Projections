@@ -1,4 +1,4 @@
-require("../../lib/pg-events")
+require("../../lib/projections")
 	.projectStream('Quest')
 	.named('Party')
 	.by({

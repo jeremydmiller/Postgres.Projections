@@ -1,5 +1,5 @@
 var assert = require("assert")
-var projector = require("../lib/pg-events");
+var projector = require("../lib/projections");
 
 
 
