@@ -95,7 +95,7 @@ module.exports = {
 	},
 
 	cleanAll: function(done){
-		return client.cleanAll();
+		return client.config.cleanAll();
 	},
 
 	scenario: function(configure){
