@@ -1,4 +1,4 @@
-var client = require('../lib/client');
+var client = require('../lib/pg-eventstore');
 
 module.exports = {
 	QuestStarted: function(location, members){

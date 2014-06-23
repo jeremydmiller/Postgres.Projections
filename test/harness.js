@@ -3,7 +3,7 @@ var projectionFolder = __dirname + '/projections';
 var Promise = require("bluebird");
 var expect = require('chai').expect;
 
-var client = require('../lib/client');
+var client = require('../lib/pg-eventstore');
 client.start({connection: connection});
 
 function Harness(){
